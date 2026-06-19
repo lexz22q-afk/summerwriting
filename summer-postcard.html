@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>My Summer Postcard ☀️</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --green:#22c55e; --green-d:#16a34a;
+    --red:#ef476f; --red-d:#c43359;
+    --sun:#ffd23f; --sun-d:#f4a900;
+    --sky:#7ec6ff; --sky-d:#4aa8f0;
+    --coral:#ff6b5e; --coral-d:#e8523f;
+    --ink:#3a2a14; --ink-soft:#7a6346;
+    --card:#ffffff; --cream:#fff8e8;
+    --shadow:0 8px 22px rgba(120,80,20,.18);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Nunito',system-ui,sans-serif;color:var(--ink);min-height:100vh;
+    background:linear-gradient(180deg,#aedcf2 0%,#e9f5ec 100%);
+    transition:background .8s ease;overflow-x:hidden;user-select:none;
+  }
+  #app{max-width:760px;margin:0 auto;padding:10px 12px 26px;}
+  .hud{position:sticky;top:0;z-index:40;display:flex;gap:8px;align-items:center;padding:8px 4px 10px;}
+  .chip{background:rgba(255,255,255,.94);border-radius:16px;padding:6px 12px;font-weight:900;font-size:15px;
+    color:var(--ink);box-shadow:var(--shadow);display:flex;align-items:center;gap:6px;white-space:nowrap;}
+  .chip .ic{font-size:18px;}
+  #score.bump{animation:bump .35s ease;}
+  @keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.22)}100%{transform:scale(1)}}
+  .sun-wrap{flex:1;background:rgba(255,255,255,.94);border-radius:16px;padding:6px 12px;box-shadow:var(--shadow);}
+  .sun-top{display:flex;justify-content:space-between;font-weight:800;font-size:12px;color:var(--ink-soft);margin-bottom:3px;}
+  .sun-bar{height:12px;border-radius:8px;background:#ede3cf;overflow:hidden;}
+  .sun-fill{height:100%;width:0%;border-radius:8px;background:linear-gradient(90deg,#ffe79a,#ffd23f,#f4a900);transition:width .5s cubic-bezier(.2,.8,.2,1);}
+  .stage{background:var(--card);border-radius:24px;padding:18px 16px 20px;box-shadow:var(--shadow);margin-top:6px;animation:in .4s ease;}
+  @keyframes in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+  .step-tag{display:inline-block;background:var(--sun);color:var(--ink);font-weight:900;font-size:12px;
+    letter-spacing:.5px;padding:4px 12px;border-radius:20px;margin-bottom:8px;}
+  h1{font-size:26px;margin:2px 0 4px;line-height:1.1;}
+  h2{font-size:21px;margin:2px 0 10px;line-height:1.15;}
+  .q{font-size:19px;font-weight:800;margin:4px 0 14px;line-height:1.3;}
+  .sub{color:var(--ink-soft);font-weight:700;font-size:15px;margin:0 0 12px;}
+  .center{text-align:center;}
+  .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
+  .btn{font-family:inherit;font-weight:900;font-size:17px;border:none;cursor:pointer;border-radius:16px;
+    padding:13px 18px;color:#fff;background:var(--sky-d);box-shadow:0 4px 0 #2e8bd4;transition:transform .08s, box-shadow .08s;}
+  .btn:active{transform:translateY(3px);box-shadow:0 1px 0 #2e8bd4;}
+  .btn.go{background:var(--sun-d);box-shadow:0 4px 0 #c98300;color:#3a2a14;}
+  .btn.go:active{box-shadow:0 1px 0 #c98300;}
+  .btn.ghost{background:#f1eadb;color:var(--ink-soft);box-shadow:0 4px 0 #ddd2bd;}
+  .btn.ghost:active{box-shadow:0 1px 0 #ddd2bd;}
+  .opts{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .opt{font-family:inherit;font-weight:800;font-size:17px;cursor:pointer;background:var(--cream);
+    border:3px solid #f3e6c4;border-radius:16px;padding:14px 10px;color:var(--ink);
+    transition:transform .08s,border-color .12s,background .12s;min-height:54px;}
+  .opt:active{transform:scale(.97);}
+  .opt.correct{background:#dcffe4;border-color:var(--green);color:var(--green-d);}
+  .opt.wrong{background:#ffe1e9;border-color:var(--red);color:var(--red-d);}
+  .opt:disabled{cursor:default;opacity:.85;}
+  .mem-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+  .mem{aspect-ratio:1/1.05;border-radius:14px;border:none;cursor:pointer;font-family:inherit;font-weight:900;
+    font-size:15px;background:linear-gradient(160deg,#ffd23f,#f4a900);color:#fff;display:flex;align-items:center;
+    justify-content:center;text-align:center;padding:4px;transition:transform .14s;line-height:1.1;}
+  .mem .face{display:none;}
+  .mem.up{background:var(--cream);color:var(--ink);border:3px solid var(--sun-d);}
+  .mem.up .face{display:block;} .mem.up .back{display:none;}
+  .mem.matched{background:#dcffe4;border:3px solid var(--green);color:var(--green-d);cursor:default;animation:pop .3s ease;}
+  @keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.1)}100%{transform:scale(1)}}
+  .mem .icn{font-size:24px;}
+  .typebox{display:flex;gap:8px;margin-top:6px;flex-wrap:wrap;}
+  input.txt{flex:1;min-width:160px;font-family:inherit;font-weight:800;font-size:20px;padding:13px 14px;
+    border:3px solid #f3e6c4;border-radius:16px;color:var(--ink);background:var(--cream);outline:none;}
+  input.txt:focus{border-color:var(--sun-d);}
+  textarea.txt{width:100%;font-family:inherit;font-weight:700;font-size:18px;padding:13px 14px;border:3px solid #f3e6c4;
+    border-radius:16px;color:var(--ink);background:var(--cream);outline:none;min-height:96px;resize:vertical;line-height:1.4;}
+  textarea.txt:focus{border-color:var(--sun-d);}
+  .hint{color:var(--ink-soft);font-weight:700;font-size:14px;margin-top:8px;}
+  .gaptext{font-size:18px;line-height:2;font-weight:700;background:var(--cream);border:3px solid #f3e6c4;border-radius:18px;padding:16px;}
+  .gap{display:inline-block;min-width:84px;border-bottom:3px dashed var(--sun-d);text-align:center;font-weight:900;
+    color:var(--ink-soft);padding:0 6px;cursor:pointer;margin:0 2px;}
+  .gap.filled{border-bottom:3px solid var(--green);color:var(--green-d);background:#e9ffef;border-radius:8px;}
+  .bank,.helpers{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:14px;}
+  .word{font-family:inherit;font-weight:900;font-size:17px;background:var(--sky);border:none;border-radius:14px;
+    padding:10px 14px;cursor:pointer;color:#173b57;box-shadow:0 3px 0 var(--sky-d);}
+  .word:active{transform:translateY(2px);box-shadow:0 1px 0 var(--sky-d);}
+  .word.used{opacity:.25;pointer-events:none;}
+  .build{min-height:58px;background:var(--cream);border:3px dashed var(--sun-d);border-radius:16px;padding:10px;
+    display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;}
+  .tile{font-family:inherit;font-weight:800;font-size:17px;background:#fff;border:3px solid #f3e6c4;border-radius:12px;
+    padding:9px 12px;cursor:pointer;color:var(--ink);}
+  .tile:active{transform:scale(.96);}
+  .pool{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+  .tile.used{opacity:.2;pointer-events:none;}
+  #toast{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%) scale(.6);z-index:80;padding:16px 26px;
+    border-radius:20px;font-weight:900;font-size:24px;color:#fff;box-shadow:var(--shadow);opacity:0;pointer-events:none;
+    transition:transform .2s,opacity .2s;text-align:center;}
+  #toast.show{opacity:1;transform:translate(-50%,-50%) scale(1);}
+  #toast.ok{background:var(--green);} #toast.no{background:var(--red);}
+  .review{margin-top:14px;background:#fff5f7;border:3px solid var(--red);border-radius:16px;padding:14px 40px 14px 16px;
+    position:relative;font-weight:800;color:var(--red-d);font-size:16px;line-height:1.4;}
+  .review .x{position:absolute;top:8px;right:10px;width:30px;height:30px;border-radius:50%;border:none;background:var(--red);
+    color:#fff;font-weight:900;font-size:18px;cursor:pointer;line-height:1;}
+  .review b{color:var(--green-d);}
+  .hero{text-align:center;padding:6px 0 0;}
+  .hero svg{filter:drop-shadow(0 8px 10px rgba(120,80,20,.2));}
+  .stars{font-size:46px;letter-spacing:6px;margin:8px 0;}
+  .big-score{font-size:40px;font-weight:900;color:var(--sun-d);}
+  .postcard{background:#fffdf6;border:6px solid #fff;border-radius:14px;box-shadow:var(--shadow);padding:16px 18px;
+    text-align:left;font-size:18px;font-weight:700;line-height:1.5;color:var(--ink);transform:rotate(-1.2deg);margin:6px 0 4px;}
+  .postcard .stamp{float:right;width:48px;height:48px;border-radius:8px;background:var(--sun);display:flex;align-items:center;
+    justify-content:center;font-size:26px;margin-left:8px;transform:rotate(4deg);}
+  .clouds{position:fixed;inset:0;pointer-events:none;z-index:5;overflow:hidden;}
+  .cloud{position:absolute;color:#fff;opacity:.85;animation:drift linear infinite;}
+  @keyframes drift{from{transform:translateX(-120px)}to{transform:translateX(110vw)}}
+  @media (max-width:480px){h1{font-size:22px;} .q{font-size:17px;} .opt{font-size:16px;} .mem{font-size:13px;} .chip{font-size:13px;padding:6px 9px;}}
+  @media (prefers-reduced-motion:reduce){*{animation-duration:.001s!important;transition-duration:.15s!important;}}
+</style>
+</head>
+<body>
+<div class="clouds" id="clouds"></div>
+<div id="app">
+  <div class="hud">
+    <div class="chip" id="score"><span class="ic">⭐</span><span id="scoreN">0</span></div>
+    <div class="sun-wrap">
+      <div class="sun-top"><span id="sunIcon">🌥️ Утро</span><span id="sunPct">0%</span></div>
+      <div class="sun-bar"><div class="sun-fill" id="sunFill"></div></div>
+    </div>
+  </div>
+  <div id="screen"></div>
+</div>
+<div id="toast"></div>
+
+<script>
+"use strict";
+let score=0, correctCount=0;
+const TOTAL_ITEMS=26;            // 6+5+4+4+3+4
+const MAX_SCORE=TOTAL_ITEMS*10;  // 260
+const screen=document.getElementById('screen');
+
+/* ---------------- ORIGINAL SVG ART ---------------- */
+const ART={
+  kid:`<svg viewBox="0 0 130 140" width="124" height="134">
+    <ellipse cx="65" cy="128" rx="40" ry="9" fill="#000" opacity=".08"/>
+    <rect x="40" y="86" width="50" height="40" rx="14" fill="#ff6b5e"/>
+    <circle cx="65" cy="62" r="32" fill="#ffe2c4"/>
+    <ellipse cx="65" cy="40" rx="44" ry="14" fill="#f0cd84"/>
+    <ellipse cx="65" cy="36" rx="24" ry="16" fill="#f7da9a"/>
+    <ellipse cx="65" cy="40" rx="44" ry="9" fill="#e6bf6e"/>
+    <circle cx="54" cy="62" r="4.5" fill="#3a2a14"/><circle cx="76" cy="62" r="4.5" fill="#3a2a14"/>
+    <circle cx="48" cy="70" r="6" fill="#ffb3a0" opacity=".7"/><circle cx="82" cy="70" r="6" fill="#ffb3a0" opacity=".7"/>
+    <path d="M54 76 q11 10 22 0" stroke="#3a2a14" stroke-width="3" fill="none" stroke-linecap="round"/>
+    <circle cx="36" cy="102" r="7" fill="#ffe2c4"/><circle cx="94" cy="102" r="7" fill="#ffe2c4"/>
+  </svg>`,
+  sun:function(happy){return `<svg viewBox="0 0 120 120" width="118" height="118">
+    <g stroke="#f4a900" stroke-width="6" stroke-linecap="round">
+      <line x1="60" y1="6" x2="60" y2="20"/><line x1="60" y1="100" x2="60" y2="114"/>
+      <line x1="6" y1="60" x2="20" y2="60"/><line x1="100" y1="60" x2="114" y2="60"/>
+      <line x1="22" y1="22" x2="32" y2="32"/><line x1="88" y1="88" x2="98" y2="98"/>
+      <line x1="98" y1="22" x2="88" y2="32"/><line x1="32" y1="88" x2="22" y2="98"/></g>
+    <circle cx="60" cy="60" r="32" fill="#ffd23f"/>
+    <circle cx="50" cy="56" r="4.5" fill="#7a5a10"/><circle cx="70" cy="56" r="4.5" fill="#7a5a10"/>
+    <circle cx="42" cy="64" r="5" fill="#ffb24d" opacity=".7"/><circle cx="78" cy="64" r="5" fill="#ffb24d" opacity=".7"/>
+    ${happy?'<path d="M48 68 q12 12 24 0" stroke="#7a5a10" stroke-width="3.4" fill="none" stroke-linecap="round"/>'
+            :'<path d="M50 70 q10 7 20 0" stroke="#7a5a10" stroke-width="3.2" fill="none" stroke-linecap="round"/>'}
+  </svg>`;}
+};
+
+/* ---------------- HELPERS ---------------- */
+function norm(s){return (s||'').toLowerCase().trim().replace(/[.!?,;:]/g,'').replace(/-/g,' ').replace(/[’']/g,"'").replace(/\s+/g,' ');}
+function stripArt(s){return s.replace(/^(a|an|the)\s+/,'');}
+function matchAny(input,answers){const n=norm(input),ns=stripArt(n);
+  return answers.some(a=>{const m=norm(a);return n===m||ns===m||n===stripArt(m)||ns===stripArt(m);});}
+function addScore(){score+=10;correctCount++;
+  document.getElementById('scoreN').textContent=score;
+  const sc=document.getElementById('score');sc.classList.remove('bump');void sc.offsetWidth;sc.classList.add('bump');
+  updateSun();}
+function updateSun(){
+  const pct=Math.min(100,Math.round(correctCount/TOTAL_ITEMS*100));
+  document.getElementById('sunFill').style.width=pct+'%';
+  document.getElementById('sunPct').textContent=pct+'%';
+  const wi=document.getElementById('sunIcon');
+  wi.textContent = pct<25?'🌥️ Утро' : pct<55?'⛅ Теплеет' : pct<85?'🌤️ Солнечно' : '☀️ Жара!';
+  const t=pct/100;
+  const top0=[174,220,242], top1=[123,198,255];
+  const bot0=[233,245,236], bot1=[255,243,196];
+  const top=top0.map((c,i)=>Math.round(c+(top1[i]-c)*t));
+  const bot=bot0.map((c,i)=>Math.round(c+(bot1[i]-c)*t));
+  document.body.style.background=`linear-gradient(180deg,rgb(${top.join(',')}) 0%,rgb(${bot.join(',')}) 100%)`;
+}
+function toast(ok,msg){const t=document.getElementById('toast');t.className='show '+(ok?'ok':'no');t.textContent=msg;
+  setTimeout(()=>{t.className=t.className.replace('show','').trim();},1100);}
+function celebrate(){toast(true,'ВЕРНО! +10 ⭐');}
+function disableAll(box){[...box.children].forEach(c=>c.disabled=true);}
+function showReview(boxId,answer,onClose){
+  const fb=document.getElementById(boxId);
+  fb.innerHTML=`<div class="review">Правильный ответ: <b>${answer}</b><button class="x" title="Закрыть">✕</button></div>`;
+  fb.querySelector('.x').onclick=onClose;
+}
+function say(w){try{const u=new SpeechSynthesisUtterance(w);u.lang='en-US';u.rate=.85;speechSynthesis.cancel();speechSynthesis.speak(u);}catch(e){}}
+
+/* ---------------- FLOW ---------------- */
+let stageIndex=0;
+const stages=[intro,stageMemory,stageVocab,stageType,stageFillGaps,stageSentence,stageWriting,endScreen];
+function next(){stageIndex++;stages[stageIndex]();window.scrollTo(0,0);}
+
+/* ---------------- 0. INTRO ---------------- */
+function intro(){
+  screen.innerHTML=`<div class="stage hero">
+    <span class="step-tag">SUMMER POSTCARD</span>
+    <div>${ART.kid}</div>
+    <h1>Летняя открытка ☀️</h1>
+    <p class="sub">Соберём слова, прочитаем образец — и ты <b>напишешь свою открытку</b> другу!<br>Каждый верный ответ: <b>+10 ⭐</b> и больше солнца.</p>
+    <div class="postcard" style="transform:rotate(-1deg)">
+      <span class="stamp">☀️</span>
+      In this photo I'm with my friends.<br>It's a hot and sunny day.<br>I'm wearing a red T-shirt and shorts.
+    </div>
+    <div class="row" style="margin-top:14px"><button class="btn go" style="font-size:20px;padding:15px 30px" onclick="next()">Начать ▶</button></div>
+  </div>`;
+}
+
+/* ---------------- 1. MEMORY ---------------- */
+const memPairs=[['hot','жаркий'],['sunny','солнечный'],['T-shirt','футболка'],['shorts','шорты'],['hat','шляпа'],['friends','друзья']];
+function stageMemory(){
+  let cards=[];memPairs.forEach((p,i)=>{cards.push({t:p[0],id:i});cards.push({t:p[1],id:i});});
+  cards=cards.sort(()=>Math.random()-0.5);
+  screen.innerHTML=`<div class="stage">
+    <span class="step-tag">ШАГ 1 · СЛОВА</span>
+    <h2>Найди пары ☀️</h2>
+    <p class="sub">Нажми на слово и его перевод. <b>hot ↔ жаркий</b></p>
+    <div class="mem-grid" id="memGrid"></div>
+  </div>`;
+  const grid=document.getElementById('memGrid');
+  cards.forEach(c=>{const b=document.createElement('button');b.className='mem';
+    b.innerHTML=`<span class="back icn">☀️</span><span class="face">${c.t}</span>`;b.onclick=()=>flip(b,c);grid.appendChild(b);});
+  let open=null,lock=false,done=0;
+  function flip(b,c){
+    if(lock||b.classList.contains('matched')||b.classList.contains('up'))return;
+    b.classList.add('up');
+    if(!open){open={b,c};return;}
+    lock=true;
+    if(open.c.id===c.id&&open.b!==b){
+      setTimeout(()=>{open.b.classList.add('matched');b.classList.add('matched');addScore();celebrate();
+        open=null;lock=false;done++;if(done===memPairs.length)setTimeout(next,900);},350);
+    }else{setTimeout(()=>{open.b.classList.remove('up');b.classList.remove('up');open=null;lock=false;},750);}
+  }
+}
+
+/* ---------------- 2. VOCAB (multiple choice from 6) ---------------- */
+const vocabQ=[
+  {emoji:'☀️',q:'Какая погода?',a:'sunny',opts:['sunny','rainy','hot','cold','windy','hat']},
+  {emoji:'🌧️',q:'Какая погода?',a:'rainy',opts:['rainy','sunny','windy','hot','cold','shorts']},
+  {emoji:'👕',q:'Что это?',a:'T-shirt',opts:['T-shirt','shorts','hat','jacket','sunny','hot']},
+  {emoji:'🩳',q:'Что это?',a:'shorts',opts:['shorts','T-shirt','jacket','hat','rainy','cold']},
+  {emoji:'🧥',q:'Что это?',a:'jacket',opts:['jacket','T-shirt','shorts','hat','sunny','windy']}
+];
+let vqi=0;
+function stageVocab(){vqi=0;showVocab();}
+function showVocab(){
+  if(vqi>=vocabQ.length){next();return;}
+  const it=vocabQ[vqi];
+  screen.innerHTML=`<div class="stage center">
+    <span class="step-tag">ШАГ 2 · СЛОВА · ${vqi+1}/${vocabQ.length}</span>
+    <div style="font-size:58px;min-height:90px;display:flex;align-items:center;justify-content:center">${it.emoji}</div>
+    <p class="q">${it.q}</p><div class="opts" id="opts"></div><div id="fb"></div>
+  </div>`;
+  const box=document.getElementById('opts');
+  let tries=0;
+  [...it.opts].sort(()=>Math.random()-0.5).forEach(o=>{
+    const b=document.createElement('button');b.className='opt';b.textContent=o;
+    b.onclick=()=>{
+      if(o===it.a){b.classList.add('correct');disableAll(box);addScore();celebrate();setTimeout(()=>{vqi++;showVocab();},1250);}
+      else{tries++;b.classList.add('wrong');b.disabled=true;
+        if(tries>=2){disableAll(box);[...box.children].forEach(c=>{if(c.textContent===it.a)c.classList.add('correct');});
+          showReview('fb',it.a,()=>{vqi++;showVocab();});}
+        else toast(false,'Ещё попытка 🤔');}
+    };box.appendChild(b);
+  });
+}
+
+/* ---------------- 3. TYPE THE WORD ---------------- */
+const typeQ=[
+  {ru:'жаркий',a:['hot']},
+  {ru:'солнечный',a:['sunny']},
+  {ru:'футболка',a:['t-shirt','tshirt','t shirt','a t-shirt','a tshirt']},
+  {ru:'друзья',a:['friends','my friends']}
+];
+let tqi=0;
+function stageType(){tqi=0;showType();}
+function showType(){
+  if(tqi>=typeQ.length){next();return;}
+  const it=typeQ[tqi];
+  screen.innerHTML=`<div class="stage center">
+    <span class="step-tag">ШАГ 3 · НАПЕЧАТАЙ · ${tqi+1}/${typeQ.length}</span>
+    <p class="sub">Напечатай слово по-английски:</p>
+    <p class="q" style="font-size:28px;color:var(--coral-d)">${it.ru}
+      <button class="word" style="background:#eaf4f9;box-shadow:0 3px 0 #cfe4ee;font-size:15px;padding:6px 10px;color:#173b57" onclick="say('${it.a[0].replace(/^a /,'')}')">🔊</button></p>
+    <div class="typebox"><input class="txt" id="inp" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="..."><button class="btn go" id="chk">Проверить</button></div>
+    <p class="hint">2 попытки · регистр и точки не важны</p><div id="fb"></div>
+  </div>`;
+  const inp=document.getElementById('inp'),chk=document.getElementById('chk');inp.focus();let tries=0;
+  function submit(){
+    if(matchAny(inp.value,it.a)){chk.disabled=true;inp.disabled=true;inp.style.borderColor='var(--green)';
+      addScore();celebrate();setTimeout(()=>{tqi++;showType();},1250);}
+    else{tries++;inp.style.borderColor='var(--red)';
+      if(tries>=2){chk.disabled=true;inp.disabled=true;showReview('fb',it.a[0],()=>{tqi++;showType();});}
+      else{toast(false,'Ещё попытка 🤔');inp.select();}}
+  }
+  chk.onclick=submit;inp.addEventListener('keydown',e=>{if(e.key==='Enter')submit();});
+}
+
+/* ---------------- 4. FILL GAPS (model text) ---------------- */
+const gapAnswers=['friends','hot','sunny','T-shirt'];
+function stageFillGaps(){
+  const tmpl=[
+    {pre:"In this photo I'm with my ",post:"."},
+    {pre:" It's a ",post:" and"},
+    {pre:" ",post:" day."},
+    {pre:" I'm wearing a red ",post:"."}
+  ];
+  let gaps=Array(4).fill(null);
+  const bank=[...gapAnswers,'rainy'].sort(()=>Math.random()-0.5);
+  screen.innerHTML=`<div class="stage">
+    <span class="step-tag">ШАГ 4 · СОБЕРИ ТЕКСТ</span>
+    <p class="sub">Нажми слово внизу — оно встанет в пропуск. Нажми на пропуск, чтобы убрать.</p>
+    <div class="gaptext" id="gt"></div><div class="bank" id="bank"></div>
+    <div class="row" style="margin-top:14px"><button class="btn ghost" id="reset">Сбросить</button><button class="btn go" id="check">Проверить</button></div>
+    <p class="hint" style="text-align:center">Одно слово лишнее 😉 · 2 попытки</p><div id="fb"></div>
+  </div>`;
+  const gt=document.getElementById('gt'),bankEl=document.getElementById('bank');
+  function render(){gt.innerHTML='';tmpl.forEach((t,i)=>{
+    gt.append(document.createTextNode(t.pre));
+    const g=document.createElement('span');g.className='gap'+(gaps[i]?' filled':'');g.textContent=gaps[i]||'______';
+    g.onclick=()=>{if(gaps[i]){gaps[i]=null;render();renderBank();}};gt.append(g);
+    gt.append(document.createTextNode(t.post+' '));});}
+  function renderBank(){bankEl.innerHTML='';bank.forEach(w=>{
+    const b=document.createElement('button');b.className='word'+(gaps.includes(w)?' used':'');b.textContent=w;
+    b.onclick=()=>{const idx=gaps.indexOf(null);if(idx>-1){gaps[idx]=w;render();renderBank();}};bankEl.appendChild(b);});}
+  render();renderBank();let tries=0;
+  document.getElementById('reset').onclick=()=>{gaps=Array(4).fill(null);render();renderBank();};
+  document.getElementById('check').onclick=()=>{
+    if(gaps.includes(null)){toast(false,'Заполни все пропуски');return;}
+    if(gaps.every((g,i)=>g===gapAnswers[i])){
+      gapAnswers.forEach(()=>addScore());celebrate();document.getElementById('check').disabled=true;setTimeout(next,1300);}
+    else{tries++;if(tries>=2){let good=0;gaps.forEach((g,i)=>{if(g===gapAnswers[i])good++;});for(let k=0;k<good;k++)addScore();
+      const fb=document.getElementById('fb');fb.innerHTML=`<div class="review">Правильно: <b>${gapAnswers.join(', ')}</b><button class="x">✕</button></div>`;
+      fb.querySelector('.x').onclick=next;document.getElementById('check').disabled=true;}
+      else toast(false,'Не всё верно. Ещё раз 🤔');}
+  };
+}
+
+/* ---------------- 5. SENTENCE BUILDER ---------------- */
+const sentQ=[
+  {words:["It's","a","hot","and","sunny","day"]},
+  {words:["I'm","with","my","friends"]},
+  {words:["I'm","wearing","a","T-shirt","and","shorts"]}
+];
+let sqi=0;
+function stageSentence(){sqi=0;showSent();}
+function showSent(){
+  if(sqi>=sentQ.length){next();return;}
+  const it=sentQ[sqi];const expected=norm(it.words.join(' '));
+  const shuffled=it.words.map((w,i)=>({w,i})).sort(()=>Math.random()-0.5);
+  let chosen=[];
+  screen.innerHTML=`<div class="stage">
+    <span class="step-tag">ШАГ 5 · СОБЕРИ · ${sqi+1}/${sentQ.length}</span>
+    <p class="sub">Нажимай слова по порядку, чтобы получить предложение.</p>
+    <div class="build" id="build"></div><div class="pool" id="pool"></div>
+    <div class="row" style="margin-top:14px"><button class="btn ghost" id="reset">Сбросить</button><button class="btn go" id="check">Проверить</button></div>
+    <p class="hint" style="text-align:center">2 попытки</p><div id="fb"></div>
+  </div>`;
+  const build=document.getElementById('build'),pool=document.getElementById('pool');
+  function render(){build.innerHTML='';chosen.forEach((c,ci)=>{
+    const t=document.createElement('button');t.className='tile';t.textContent=c.w;t.onclick=()=>{chosen.splice(ci,1);render();};build.appendChild(t);});
+    [...pool.children].forEach(el=>{el.classList.toggle('used',chosen.some(c=>c.key===el.dataset.key));});}
+  shuffled.forEach((s,i)=>{const key=s.i+'_'+i;const b=document.createElement('button');b.className='tile';b.textContent=s.w;b.dataset.key=key;
+    b.onclick=()=>{if(chosen.some(c=>c.key===key))return;chosen.push({w:s.w,key});render();};pool.appendChild(b);});
+  render();let tries=0;
+  document.getElementById('reset').onclick=()=>{chosen=[];render();};
+  document.getElementById('check').onclick=()=>{
+    if(chosen.length<it.words.length){toast(false,'Используй все слова');return;}
+    if(norm(chosen.map(c=>c.w).join(' '))===expected){
+      addScore();celebrate();document.getElementById('check').disabled=true;setTimeout(()=>{sqi++;showSent();},1300);}
+    else{tries++;if(tries>=2){const fb=document.getElementById('fb');
+      fb.innerHTML=`<div class="review">Правильно: <b>${it.words.join(' ')}.</b><button class="x">✕</button></div>`;
+      fb.querySelector('.x').onclick=()=>{sqi++;showSent();};document.getElementById('check').disabled=true;}
+      else toast(false,'Не тот порядок 🤔');}
+  };
+}
+
+/* ---------------- 6. WRITING (no auto-check, any answer accepted) ---------------- */
+const writeQ=[
+  {q:'Who are you with?', tip:["I'm with my friends.","my mom","my dad"], helpers:["I'm with","my friends","my mom","my dad","and"]},
+  {q:'What is the weather like?', tip:["It's hot and sunny."], helpers:["It's","hot","sunny","windy","and"]},
+  {q:'What are you wearing?', tip:["I'm wearing a T-shirt and shorts."], helpers:["I'm wearing","a T-shirt","shorts","a hat","and"]}
+];
+let wIndex=0;const wAns=['','',''];
+function stageWriting(){
+  wIndex=0;
+  screen.innerHTML=`<div class="stage hero">
+    <span class="step-tag">ШАГ 6 · ПИШИ САМ ✍️</span>
+    <div>${ART.sun(true)}</div>
+    <h2>Напиши свою открытку!</h2>
+    <p class="sub">Ответь на 3 вопроса по-английски. Любой твой ответ — <b>правильный</b>! 🌟<br>Можешь нажимать на синие слова-помощники.</p>
+    <div class="row"><button class="btn go" onclick="writeQuestion()">Начать письмо ✏️</button></div>
+  </div>`;
+}
+function writeQuestion(){
+  if(wIndex>=writeQ.length){writeFinish();return;}
+  const it=writeQ[wIndex];
+  screen.innerHTML=`<div class="stage">
+    <span class="step-tag">ПИШИ · ВОПРОС ${wIndex+1}/3</span>
+    <p class="q">${it.q}</p>
+    <textarea class="txt" id="winp" placeholder="${it.tip[0]}"></textarea>
+    <div class="helpers" id="helpers"></div>
+    <p class="hint" style="text-align:center">Пример: <b>${it.tip[0]}</b></p>
+    <div class="row" style="margin-top:6px"><button class="btn go" id="done">Готово ✅</button></div>
+    <div id="fb"></div>
+  </div>`;
+  const inp=document.getElementById('winp');inp.focus();
+  const hb=document.getElementById('helpers');
+  it.helpers.forEach(h=>{const b=document.createElement('button');b.className='word';b.textContent=h;
+    b.onclick=()=>{inp.value=(inp.value.trim()+' '+h).trim()+' ';inp.focus();};hb.appendChild(b);});
+  document.getElementById('done').onclick=()=>{
+    if(inp.value.trim()===''){toast(false,'Напиши что-нибудь 🙂');return;}
+    wAns[wIndex]=inp.value.trim();
+    document.getElementById('done').disabled=true;
+    addScore();toast(true,'МОЛОДЕЦ! +10 ⭐');           // no correctness check — always accepted
+    setTimeout(()=>{wIndex++;writeQuestion();},1300);
+  };
+}
+function writeFinish(){
+  const para=wAns.filter(Boolean).join(' ');
+  screen.innerHTML=`<div class="stage">
+    <span class="step-tag">ТВОЯ ОТКРЫТКА 📮</span>
+    <p class="sub">Вот твой текст! Прочитай вслух, можешь что-то добавить или поправить.</p>
+    <div class="postcard"><span class="stamp">☀️</span>${para.replace(/\n/g,'<br>')}</div>
+    <p class="sub" style="margin-top:14px">Напиши всё одним абзацем 👇</p>
+    <textarea class="txt" id="finalp" style="min-height:120px">${para}</textarea>
+    <div class="row" style="margin-top:10px"><button class="btn go" id="fdone">Готово ✅</button></div>
+    <div id="fb"></div>
+  </div>`;
+  document.getElementById('fdone').onclick=()=>{
+    const v=document.getElementById('finalp').value.trim();
+    if(v===''){toast(false,'Напиши открытку 🙂');return;}
+    document.getElementById('fdone').disabled=true;
+    addScore();toast(true,'ОТЛИЧНО! +10 ⭐');
+    setTimeout(next,1300);
+  };
+}
+
+/* ---------------- 7. END ---------------- */
+function endScreen(){
+  const pct=Math.min(100,Math.round(score/MAX_SCORE*100));
+  const stars=pct>=90?3:pct>=70?2:1;
+  const msg=stars===3?'Супер! Ты написал открытку! 🏆':stars===2?'Здорово! Молодец! 👏':'Хорошо! Попробуй ещё раз! 💪';
+  screen.innerHTML=`<div class="stage hero">
+    <span class="step-tag">ФИНИШ ☀️</span>
+    <div>${ART.sun(true)}</div>
+    <div class="stars">${'⭐'.repeat(stars)+'☆'.repeat(3-stars)}</div>
+    <div class="big-score">${score} / ${MAX_SCORE}</div>
+    <p class="sub" style="margin-top:8px">${msg}</p>
+    <div class="row"><button class="btn go" onclick="restart()">Играть снова 🔄</button></div>
+  </div>`;
+}
+function restart(){score=0;correctCount=0;stageIndex=0;wAns[0]=wAns[1]=wAns[2]='';
+  document.getElementById('scoreN').textContent='0';updateSun();stages[0]();window.scrollTo(0,0);}
+
+/* ---------------- CLOUDS ---------------- */
+(function clouds(){const c=document.getElementById('clouds');
+  for(let i=0;i<5;i++){const f=document.createElement('div');f.className='cloud';f.textContent='☁';
+    f.style.top=(5+Math.random()*40)+'%';f.style.fontSize=(22+Math.random()*26)+'px';
+    f.style.animationDuration=(28+Math.random()*22)+'s';f.style.animationDelay=(-Math.random()*30)+'s';c.appendChild(f);}})();
+
+updateSun();intro();
+</script>
+</body>
+</html>
